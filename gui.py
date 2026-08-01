@@ -2,7 +2,7 @@ import customtkinter as ctk
 from tkinter import filedialog, messagebox
 import threading
 import os
-from main import create_video  
+from main import create_video
 
 BG_COLOR = "#0f111a"
 FRAME_COLOR = "#1a1d2e"

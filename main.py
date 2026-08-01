@@ -4,16 +4,13 @@ from PIL import Image, ImageOps
 from moviepy import ImageClip, concatenate_videoclips, AudioFileClip
 from moviepy.audio.fx import AudioLoop
 
-# ================= НАСТРОЙКИ ДВИЖКА =================
 TARGET_WIDTH = 1080
 TARGET_HEIGHT = 1920
 BACKGROUND_COLOR = (0, 0, 0)
 FRAME_DURATION = 4
 FPS = 30
-FIT_MODE = 'cover'  # 'cover' или 'contain'
+FIT_MODE = 'cover'
 
-
-# ====================================================
 
 def prepare_image(image_path):
     img = Image.open(image_path).convert("RGB")
@@ -44,8 +41,6 @@ def get_supported_files(directory, extensions):
             files.append(os.path.join(directory, filename))
     return files
 
-
-# Главная функция теперь принимает пути и функции для обновления GUI
 def create_video(image_dir, audio_path, output_path, status_callback=None, progress_callback=None):
     def log(msg):
         if status_callback:
@@ -78,7 +73,6 @@ def create_video(image_dir, audio_path, output_path, status_callback=None, progr
         clip = ImageClip(frame_array, duration=FRAME_DURATION).with_fps(FPS)
         clips.append(clip)
 
-        # Обновляем прогресс-бар (половина работы сделана)
         update_progress((i + 1) / total_images * 50)
 
     log("⏳ Склеиваю клипы...")
@@ -94,14 +88,14 @@ def create_video(image_dir, audio_path, output_path, status_callback=None, progr
     final_video = final_video.with_audio(audio)
 
     log(" Рендеринг видео (самый долгий этап)...")
-    update_progress(60)  # Начинаем рендер
+    update_progress(60)
 
     try:
         final_video.write_videofile(
             output_path,
             fps=FPS, codec="libx264", audio_codec="aac",
             preset="medium", ffmpeg_params=["-movflags", "+faststart"],
-            logger=None  # Отключаем консольный прогресс-бар, чтобы не засорять GUI
+            logger=None
         )
         update_progress(100)
         log("✅ Готово! Видео сохранено.")
