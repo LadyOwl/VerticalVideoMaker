@@ -27,7 +27,7 @@ class VerticalVideoApp(ctk.CTk):
         self.resizable(True, True)
         self.configure(fg_color=BG_COLOR)
 
-        self.selected_images = []  # Список путей в порядке добавления
+        self.selected_images = []
         self.audio_file_path = ctk.StringVar()
         self.is_generating = False
 
@@ -36,7 +36,7 @@ class VerticalVideoApp(ctk.CTk):
     def setup_ui(self):
         # Заголовок
         self.title_label = ctk.CTkLabel(
-            self, text="⚡ Vertical Video Maker ⚡",
+            self, text="⚡ Vertical Video Maker ",
             font=ctk.CTkFont(size=30, weight="bold"), text_color=NEON_CYAN
         )
         self.title_label.pack(pady=15)
@@ -53,7 +53,6 @@ class VerticalVideoApp(ctk.CTk):
             font=ctk.CTkFont(size=15, weight="bold"), text_color=NEON_CYAN
         ).pack(pady=(12, 8))
 
-        # Кнопки управления
         btn_frame = ctk.CTkFrame(self.image_frame, fg_color="transparent")
         btn_frame.pack(pady=5, padx=15, fill="x")
 
@@ -75,7 +74,6 @@ class VerticalVideoApp(ctk.CTk):
         )
         self.clear_btn.pack(side="right", padx=10, pady=5)
 
-        # Список файлов (скроллируемый)
         self.list_frame = ctk.CTkScrollableFrame(
             self.image_frame, corner_radius=12, fg_color="#0d1120",
             border_width=1, border_color=NEON_BLUE, height=160
@@ -140,7 +138,7 @@ class VerticalVideoApp(ctk.CTk):
 
         # ================= КНОПКА ГЕНЕРАЦИИ =================
         self.generate_btn = ctk.CTkButton(
-            self, text="🎬 СОЗДАТЬ ВИДЕО",
+            self, text=" СОЗДАТЬ ВИДЕО",
             font=ctk.CTkFont(size=20, weight="bold"),
             command=self.start_generation,
             fg_color=NEON_GREEN, hover_color="#33ffaa",
@@ -170,14 +168,14 @@ class VerticalVideoApp(ctk.CTk):
         )
         self.status_label.pack(pady=8)
 
+    # ================= ЛОГИКА ИНТЕРФЕЙСА =================
+
     def add_images(self):
-        """Добавляет файлы В ТОМ ПОРЯДКЕ, в котором их выбрал пользователь"""
         files = filedialog.askopenfilenames(
             title="Выберите изображения",
             filetypes=[("Image files", "*.jpg *.jpeg *.png")]
         )
         if files:
-            # 🔥 БЕЗ сортировки — сохраняем порядок выбора
             self.selected_images.extend(files)
             self.update_files_list()
             self.update_status(f"✓ Добавлено: {len(files)} изобр.")
@@ -188,21 +186,18 @@ class VerticalVideoApp(ctk.CTk):
         self.update_status("Список изображений очищен")
 
     def remove_image(self, index):
-        """Удаляет конкретный файл из списка по индексу"""
         if 0 <= index < len(self.selected_images):
             self.selected_images.pop(index)
             self.update_files_list()
             self.update_status(f"Удалено изображение #{index + 1}")
 
     def move_image_up(self, index):
-        """Перемещает файл вверх в списке"""
         if index > 0:
             self.selected_images[index], self.selected_images[index - 1] = \
                 self.selected_images[index - 1], self.selected_images[index]
             self.update_files_list()
 
     def move_image_down(self, index):
-        """Перемещает файл вниз в списке"""
         if index < len(self.selected_images) - 1:
             self.selected_images[index], self.selected_images[index + 1] = \
                 self.selected_images[index + 1], self.selected_images[index]
@@ -213,8 +208,6 @@ class VerticalVideoApp(ctk.CTk):
         self.update_status("Аудио удалено")
 
     def update_files_list(self):
-        """Перерисовывает список файлов с кнопками управления"""
-        # Очищаем текущий список
         for widget in self.list_frame.winfo_children():
             widget.destroy()
 
@@ -228,14 +221,9 @@ class VerticalVideoApp(ctk.CTk):
             for i, file_path in enumerate(self.selected_images):
                 file_name = os.path.basename(file_path)
 
-                # Создаем строку для каждого файла
-                row_frame = ctk.CTkFrame(
-                    self.list_frame, fg_color="transparent",
-                    corner_radius=8
-                )
+                row_frame = ctk.CTkFrame(self.list_frame, fg_color="transparent", corner_radius=8)
                 row_frame.pack(pady=2, padx=5, fill="x")
 
-                # Номер и имя файла
                 name_label = ctk.CTkLabel(
                     row_frame, text=f"{i + 1}. {file_name}",
                     text_color=TEXT_COLOR, justify="left", anchor="w",
@@ -243,7 +231,6 @@ class VerticalVideoApp(ctk.CTk):
                 )
                 name_label.pack(side="left", padx=5, fill="x", expand=True)
 
-                # Кнопка "Вверх"
                 up_btn = ctk.CTkButton(
                     row_frame, text="↑", width=35, height=28,
                     fg_color=NEON_BLUE, hover_color="#0088ff",
@@ -253,7 +240,6 @@ class VerticalVideoApp(ctk.CTk):
                 )
                 up_btn.pack(side="left", padx=2)
 
-                # Кнопка "Вниз"
                 down_btn = ctk.CTkButton(
                     row_frame, text="↓", width=35, height=28,
                     fg_color=NEON_BLUE, hover_color="#0088ff",
@@ -263,9 +249,8 @@ class VerticalVideoApp(ctk.CTk):
                 )
                 down_btn.pack(side="left", padx=2)
 
-                # Кнопка "Удалить"
                 del_btn = ctk.CTkButton(
-                    row_frame, text="", width=35, height=28,
+                    row_frame, text="✕", width=35, height=28,
                     fg_color=NEON_PINK, hover_color="#ff3388",
                     text_color=TEXT_COLOR, corner_radius=8,
                     font=ctk.CTkFont(size=14, weight="bold"),
@@ -273,12 +258,9 @@ class VerticalVideoApp(ctk.CTk):
                 )
                 del_btn.pack(side="left", padx=2)
 
-        # Обновляем счетчик
         count = len(self.selected_images)
         if count > 0:
-            self.image_count_label.configure(
-                text=f"Выбрано: {count} изобр. (~{count * 4} сек.)"
-            )
+            self.image_count_label.configure(text=f"Выбрано: {count} изобр. (~{count * 4} сек.)")
         else:
             self.image_count_label.configure(text="Выбрано: 0 изображений")
 
@@ -295,7 +277,15 @@ class VerticalVideoApp(ctk.CTk):
         self.status_label.configure(text=text)
 
     def update_progress(self, value):
+        """Обновляет прогресс-бар и текст на кнопке генерации"""
+        # Безопасное обновление из фонового потока
         self.after(0, self.progress_bar.set, value / 100.0)
+        self.after(0, self._update_button_text, int(value))
+
+    def _update_button_text(self, percent):
+        """Меняет текст кнопки на проценты"""
+        if self.is_generating:
+            self.generate_btn.configure(text=f"⏳ Генерация: {percent}%")
 
     def start_generation(self):
         if self.is_generating:
@@ -308,16 +298,30 @@ class VerticalVideoApp(ctk.CTk):
             messagebox.showwarning("Внимание", "Выберите аудиофайл!")
             return
 
+        # 🔥 ВЫБОР ПУТИ СОХРАНЕНИЯ
+        output_path = filedialog.asksaveasfilename(
+            title="Сохранить видео как...",
+            defaultextension=".mp4",
+            filetypes=[("MP4 Video", "*.mp4")],
+            initialfile="final_video.mp4"
+        )
+
+        # Если пользователь нажал "Отмена" в диалоге сохранения
+        if not output_path:
+            self.update_status("❌ Сохранение отменено пользователем.")
+            return
+
+        # Создаем папку, если пользователь указал новый путь
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+        # Блокируем интерфейс
         self.is_generating = True
-        self.generate_btn.configure(state="disabled", text="⏳ Генерация...")
+        self.generate_btn.configure(state="disabled", text="⏳ Генерация: 0%")
         self.add_btn.configure(state="disabled")
         self.clear_btn.configure(state="disabled")
         self.audio_btn.configure(state="disabled")
         self.remove_audio_btn.configure(state="disabled")
         self.progress_bar.set(0)
-
-        output_path = os.path.join("output", "final_video.mp4")
-        os.makedirs("output", exist_ok=True)
 
         thread = threading.Thread(
             target=self.run_engine,
@@ -335,7 +339,7 @@ class VerticalVideoApp(ctk.CTk):
             if success:
                 self.after(0, lambda: messagebox.showinfo(
                     "✓ Успех!",
-                    f"Видео создано!\n\n{os.path.abspath(output_path)}"
+                    f"Видео успешно создано и сохранено!\n\n{output_path}"
                 ))
         except Exception as e:
             self.after(0, lambda: messagebox.showerror("Ошибка", str(e)))
