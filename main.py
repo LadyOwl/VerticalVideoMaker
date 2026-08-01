@@ -4,42 +4,31 @@ from PIL import Image, ImageOps
 from moviepy import ImageClip, concatenate_videoclips, AudioFileClip
 from moviepy.audio.fx import AudioLoop
 
+# ================= НАСТРОЙКИ ДВИЖКА =================
 TARGET_WIDTH = 1080
 TARGET_HEIGHT = 1920
 BACKGROUND_COLOR = (0, 0, 0)
 FRAME_DURATION = 4
 FPS = 30
-FIT_MODE = 'cover'
-
-INPUT_IMAGES_DIR = "input_images"
-INPUT_AUDIO_DIR = "input_audio"
-OUTPUT_DIR = "output"
+FIT_MODE = 'cover'  # 'cover' или 'contain'
 
 
+# ====================================================
 
 def prepare_image(image_path):
     img = Image.open(image_path).convert("RGB")
-
     if FIT_MODE == 'cover':
-        img_fitted = ImageOps.fit(
-            img,
-            (TARGET_WIDTH, TARGET_HEIGHT),
-            method=Image.Resampling.LANCZOS,
-            bleed=0.0,
-            centering=(0.5, 0.5)
-        )
-        return img_fitted
+        return ImageOps.fit(img, (TARGET_WIDTH, TARGET_HEIGHT), method=Image.Resampling.LANCZOS, bleed=0.0,
+                            centering=(0.5, 0.5))
     else:
         img_ratio = img.width / img.height
         target_ratio = TARGET_WIDTH / TARGET_HEIGHT
-
         if img_ratio > target_ratio:
             new_width = TARGET_WIDTH
             new_height = int(TARGET_WIDTH / img_ratio)
         else:
             new_height = TARGET_HEIGHT
             new_width = int(TARGET_HEIGHT * img_ratio)
-
         img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
         background = Image.new("RGB", (TARGET_WIDTH, TARGET_HEIGHT), BACKGROUND_COLOR)
         x_offset = (TARGET_WIDTH - new_width) // 2
@@ -56,65 +45,71 @@ def get_supported_files(directory, extensions):
     return files
 
 
-def create_video(output_filename="final_video.mp4"):
-    image_paths = get_supported_files(INPUT_IMAGES_DIR, (".jpg", ".jpeg", ".png"))
-    audio_paths = get_supported_files(INPUT_AUDIO_DIR, (".mp3", ".wav"))
+# Главная функция теперь принимает пути и функции для обновления GUI
+def create_video(image_dir, audio_path, output_path, status_callback=None, progress_callback=None):
+    def log(msg):
+        if status_callback:
+            status_callback(msg)
+        print(msg)
+
+    def update_progress(percent):
+        if progress_callback:
+            progress_callback(percent)
+
+    image_paths = get_supported_files(image_dir, (".jpg", ".jpeg", ".png"))
 
     if not image_paths:
-        print(f"❌ В папке '{INPUT_IMAGES_DIR}' не найдено картинок.")
-        return
-    if not audio_paths:
-        print(f"❌ В папке '{INPUT_AUDIO_DIR}' не найдено аудио.")
-        return
+        log("❌ В папке не найдено картинок.")
+        return False
+    if not os.path.exists(audio_path):
+        log("❌ Аудиофайл не найден.")
+        return False
 
-    audio_path = audio_paths[0]
-    print(f"🎵 Используем трек: {os.path.basename(audio_path)}")
-    print(f" Найдено картинок: {len(image_paths)}")
-    print(f"📐 Режим адаптации: {FIT_MODE}")
+    log(f"🎵 Используем трек: {os.path.basename(audio_path)}")
+    log(f" Найдено картинок: {len(image_paths)}")
 
     clips = []
-    for path in image_paths:
-        print(f"  → Обрабатываю: {os.path.basename(path)}")
+    total_images = len(image_paths)
+
+    for i, path in enumerate(image_paths):
+        log(f"  → Обрабатываю: {os.path.basename(path)}")
         pil_image = prepare_image(path)
         frame_array = np.array(pil_image)
         clip = ImageClip(frame_array, duration=FRAME_DURATION).with_fps(FPS)
         clips.append(clip)
 
+        # Обновляем прогресс-бар (половина работы сделана)
+        update_progress((i + 1) / total_images * 50)
+
+    log("⏳ Склеиваю клипы...")
     final_video = concatenate_videoclips(clips, method="compose")
     video_duration = final_video.duration
-    print(f"⏱ Длительность видео: {video_duration:.1f} сек.")
 
+    log("🎵 Подключаю аудио...")
     audio = AudioFileClip(audio_path)
     if audio.duration < video_duration:
-        print("🔁 Трек короче видео — зацикливаем его.")
         audio = audio.with_effects([AudioLoop(duration=video_duration)])
     else:
-        print("✂️ Трек длиннее видео — обрезаем под длину ролика.")
         audio = audio.subclipped(0, video_duration)
-
     final_video = final_video.with_audio(audio)
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    output_path = os.path.join(OUTPUT_DIR, output_filename)
-    print(f"💾 Сохраняю видео в: {output_path}")
+    log(" Рендеринг видео (самый долгий этап)...")
+    update_progress(60)  # Начинаем рендер
 
     try:
         final_video.write_videofile(
             output_path,
-            fps=FPS,
-            codec="libx264",
-            audio_codec="aac",
-            preset="medium",
-            ffmpeg_params=["-movflags", "+faststart"],
-            logger="bar"
+            fps=FPS, codec="libx264", audio_codec="aac",
+            preset="medium", ffmpeg_params=["-movflags", "+faststart"],
+            logger=None  # Отключаем консольный прогресс-бар, чтобы не засорять GUI
         )
-        print(f"✅ Готово! Видео сохранено: {output_path}")
+        update_progress(100)
+        log("✅ Готово! Видео сохранено.")
+        return True
+    except Exception as e:
+        log(f"❌ Ошибка при рендере: {str(e)}")
+        return False
     finally:
-        for clip in clips:
-            clip.close()
+        for clip in clips: clip.close()
         audio.close()
         final_video.close()
-
-
-if __name__ == "__main__":
-    create_video()
