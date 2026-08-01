@@ -11,12 +11,16 @@ FRAME_DURATION = 4
 FPS = 30
 FIT_MODE = 'cover'
 
-
 def prepare_image(image_path):
     img = Image.open(image_path).convert("RGB")
     if FIT_MODE == 'cover':
-        return ImageOps.fit(img, (TARGET_WIDTH, TARGET_HEIGHT), method=Image.Resampling.LANCZOS, bleed=0.0,
-                            centering=(0.5, 0.5))
+        return ImageOps.fit(
+            img,
+            (TARGET_WIDTH, TARGET_HEIGHT),
+            method=Image.Resampling.LANCZOS,
+            bleed=0.0,
+            centering=(0.5, 0.5)
+        )
     else:
         img_ratio = img.width / img.height
         target_ratio = TARGET_WIDTH / TARGET_HEIGHT
@@ -34,14 +38,8 @@ def prepare_image(image_path):
         return background
 
 
-def get_supported_files(directory, extensions):
-    files = []
-    for filename in sorted(os.listdir(directory)):
-        if filename.lower().endswith(tuple(extensions)):
-            files.append(os.path.join(directory, filename))
-    return files
+def create_video(image_paths, audio_path, output_path, status_callback=None, progress_callback=None):
 
-def create_video(image_dir, audio_path, output_path, status_callback=None, progress_callback=None):
     def log(msg):
         if status_callback:
             status_callback(msg)
@@ -51,59 +49,92 @@ def create_video(image_dir, audio_path, output_path, status_callback=None, progr
         if progress_callback:
             progress_callback(percent)
 
-    image_paths = get_supported_files(image_dir, (".jpg", ".jpeg", ".png"))
-
     if not image_paths:
-        log("❌ В папке не найдено картинок.")
+        log("❌ Список изображений пуст.")
         return False
+
     if not os.path.exists(audio_path):
         log("❌ Аудиофайл не найден.")
         return False
 
+    valid_paths = []
+    for path in image_paths:
+        if os.path.exists(path):
+            valid_paths.append(path)
+        else:
+            log(f"⚠️ Файл не найден и будет пропущен: {os.path.basename(path)}")
+
+    if not valid_paths:
+        log("❌ Ни один из файлов не найден.")
+        return False
+
     log(f"🎵 Используем трек: {os.path.basename(audio_path)}")
-    log(f" Найдено картинок: {len(image_paths)}")
+    log(f"🖼 Обработка изображений: {len(valid_paths)} шт.")
 
     clips = []
-    total_images = len(image_paths)
+    total_images = len(valid_paths)
 
-    for i, path in enumerate(image_paths):
-        log(f"  → Обрабатываю: {os.path.basename(path)}")
-        pil_image = prepare_image(path)
-        frame_array = np.array(pil_image)
-        clip = ImageClip(frame_array, duration=FRAME_DURATION).with_fps(FPS)
-        clips.append(clip)
+    for i, path in enumerate(valid_paths):
+        log(f"  [{i + 1}/{total_images}] Обрабатываю: {os.path.basename(path)}")
+        try:
+            pil_image = prepare_image(path)
+            frame_array = np.array(pil_image)
+            clip = ImageClip(frame_array, duration=FRAME_DURATION).with_fps(FPS)
+            clips.append(clip)
 
-        update_progress((i + 1) / total_images * 50)
+            update_progress((i + 1) / total_images * 50)
+        except Exception as e:
+            log(f"❌ Ошибка обработки {os.path.basename(path)}: {str(e)}")
+
+    if not clips:
+        log("❌ Не удалось создать ни один клип.")
+        return False
 
     log("⏳ Склеиваю клипы...")
     final_video = concatenate_videoclips(clips, method="compose")
     video_duration = final_video.duration
 
     log("🎵 Подключаю аудио...")
-    audio = AudioFileClip(audio_path)
-    if audio.duration < video_duration:
-        audio = audio.with_effects([AudioLoop(duration=video_duration)])
-    else:
-        audio = audio.subclipped(0, video_duration)
-    final_video = final_video.with_audio(audio)
+    try:
+        audio = AudioFileClip(audio_path)
+        if audio.duration < video_duration:
+            log(" Трек короче видео — зацикливаем.")
+            audio = audio.with_effects([AudioLoop(duration=video_duration)])
+        else:
+            log("✂️ Трек длиннее видео — обрезаем.")
+            audio = audio.subclipped(0, video_duration)
+        final_video = final_video.with_audio(audio)
+    except Exception as e:
+        log(f"❌ Ошибка работы с аудио: {str(e)}")
+        return False
 
-    log(" Рендеринг видео (самый долгий этап)...")
+    log("🎬 Рендеринг видео (это может занять несколько минут)...")
     update_progress(60)
 
     try:
         final_video.write_videofile(
             output_path,
-            fps=FPS, codec="libx264", audio_codec="aac",
-            preset="medium", ffmpeg_params=["-movflags", "+faststart"],
+            fps=FPS,
+            codec="libx264",
+            audio_codec="aac",
+            preset="medium",
+            ffmpeg_params=["-movflags", "+faststart"],
             logger=None
         )
         update_progress(100)
-        log("✅ Готово! Видео сохранено.")
+        log(f"✅ Готово! Видео сохранено: {output_path}")
         return True
     except Exception as e:
         log(f"❌ Ошибка при рендере: {str(e)}")
         return False
     finally:
-        for clip in clips: clip.close()
-        audio.close()
-        final_video.close()
+        for clip in clips:
+            try:
+                clip.close()
+            except:
+                pass
+        try:
+            audio.close()
+            final_video.close()
+        except:
+            pass
