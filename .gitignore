@@ -1,0 +1,10 @@
+input_images/
+input_audio/
+output/
+*.mp4
+*.wav
+*.mp3
+
+__pycache__/
+*.pyc
+temp/
