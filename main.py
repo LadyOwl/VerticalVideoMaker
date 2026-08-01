@@ -80,7 +80,7 @@ def create_video(output_filename="final_video.mp4"):
         audio = audio.with_effects([AudioLoop(duration=video_duration)])
     else:
         print("✂️ Трек длиннее видео — обрезаем под длину ролика.")
-        audio = audio.subclip(0, video_duration)
+        audio = audio.subclipped(0, video_duration)
 
     final_video = final_video.with_audio(audio)
 
