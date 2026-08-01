@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 from moviepy import ImageClip, concatenate_videoclips, AudioFileClip
 from moviepy.audio.fx import AudioLoop
 
@@ -9,37 +9,46 @@ TARGET_HEIGHT = 1920
 BACKGROUND_COLOR = (0, 0, 0)
 FRAME_DURATION = 4
 FPS = 30
+FIT_MODE = 'cover'
 
 INPUT_IMAGES_DIR = "input_images"
 INPUT_AUDIO_DIR = "input_audio"
 OUTPUT_DIR = "output"
 
-def prepare_image(image_path):
 
+
+def prepare_image(image_path):
     img = Image.open(image_path).convert("RGB")
 
-    img_ratio = img.width / img.height
-    target_ratio = TARGET_WIDTH / TARGET_HEIGHT
-
-    if img_ratio > target_ratio:
-        new_width = TARGET_WIDTH
-        new_height = int(TARGET_WIDTH / img_ratio)
+    if FIT_MODE == 'cover':
+        img_fitted = ImageOps.fit(
+            img,
+            (TARGET_WIDTH, TARGET_HEIGHT),
+            method=Image.Resampling.LANCZOS,
+            bleed=0.0,
+            centering=(0.5, 0.5)
+        )
+        return img_fitted
     else:
-        new_height = TARGET_HEIGHT
-        new_width = int(TARGET_HEIGHT * img_ratio)
+        img_ratio = img.width / img.height
+        target_ratio = TARGET_WIDTH / TARGET_HEIGHT
 
-    img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        if img_ratio > target_ratio:
+            new_width = TARGET_WIDTH
+            new_height = int(TARGET_WIDTH / img_ratio)
+        else:
+            new_height = TARGET_HEIGHT
+            new_width = int(TARGET_HEIGHT * img_ratio)
 
-    background = Image.new("RGB", (TARGET_WIDTH, TARGET_HEIGHT), BACKGROUND_COLOR)
-    x_offset = (TARGET_WIDTH - new_width) // 2
-    y_offset = (TARGET_HEIGHT - new_height) // 2
-    background.paste(img_resized, (x_offset, y_offset))
-
-    return background
+        img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        background = Image.new("RGB", (TARGET_WIDTH, TARGET_HEIGHT), BACKGROUND_COLOR)
+        x_offset = (TARGET_WIDTH - new_width) // 2
+        y_offset = (TARGET_HEIGHT - new_height) // 2
+        background.paste(img_resized, (x_offset, y_offset))
+        return background
 
 
 def get_supported_files(directory, extensions):
-
     files = []
     for filename in sorted(os.listdir(directory)):
         if filename.lower().endswith(tuple(extensions)):
@@ -48,7 +57,6 @@ def get_supported_files(directory, extensions):
 
 
 def create_video(output_filename="final_video.mp4"):
-
     image_paths = get_supported_files(INPUT_IMAGES_DIR, (".jpg", ".jpeg", ".png"))
     audio_paths = get_supported_files(INPUT_AUDIO_DIR, (".mp3", ".wav"))
 
@@ -61,7 +69,8 @@ def create_video(output_filename="final_video.mp4"):
 
     audio_path = audio_paths[0]
     print(f"🎵 Используем трек: {os.path.basename(audio_path)}")
-    print(f"🖼 Найдено картинок: {len(image_paths)}")
+    print(f" Найдено картинок: {len(image_paths)}")
+    print(f"📐 Режим адаптации: {FIT_MODE}")
 
     clips = []
     for path in image_paths:
@@ -70,6 +79,7 @@ def create_video(output_filename="final_video.mp4"):
         frame_array = np.array(pil_image)
         clip = ImageClip(frame_array, duration=FRAME_DURATION).with_fps(FPS)
         clips.append(clip)
+
     final_video = concatenate_videoclips(clips, method="compose")
     video_duration = final_video.duration
     print(f"⏱ Длительность видео: {video_duration:.1f} сек.")
@@ -94,6 +104,8 @@ def create_video(output_filename="final_video.mp4"):
             fps=FPS,
             codec="libx264",
             audio_codec="aac",
+            preset="medium",
+            ffmpeg_params=["-movflags", "+faststart"],
             logger="bar"
         )
         print(f"✅ Готово! Видео сохранено: {output_path}")
