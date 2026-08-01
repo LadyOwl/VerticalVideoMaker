@@ -2,7 +2,7 @@ import os
 import numpy as np
 from PIL import Image
 from moviepy import ImageClip, concatenate_videoclips, AudioFileClip
-from moviepy.audio.fx import audio_loop
+from moviepy.audio.fx import AudioLoop
 
 TARGET_WIDTH = 1080
 TARGET_HEIGHT = 1920
@@ -77,7 +77,7 @@ def create_video(output_filename="final_video.mp4"):
     audio = AudioFileClip(audio_path)
     if audio.duration < video_duration:
         print("🔁 Трек короче видео — зацикливаем его.")
-        audio = audio_loop(audio, duration=video_duration)
+        audio = audio.with_effects([AudioLoop(duration=video_duration)])
     else:
         print("✂️ Трек длиннее видео — обрезаем под длину ролика.")
         audio = audio.subclip(0, video_duration)
