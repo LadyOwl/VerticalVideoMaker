@@ -21,7 +21,7 @@ class VerticalVideoApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Vertical Video Maker | SocialLift")
-        self.geometry("700x680") 
+        self.geometry("700x720")
         self.resizable(True, True)
         self.configure(fg_color=BG_COLOR)
 
@@ -35,195 +35,153 @@ class VerticalVideoApp(ctk.CTk):
         self.title_label = ctk.CTkLabel(
             self,
             text="⚡ Vertical Video Maker ⚡",
-            font=ctk.CTkFont(size=32, weight="bold"),
+            font=ctk.CTkFont(size=30, weight="bold"),
             text_color=NEON_CYAN
         )
-        self.title_label.pack(pady=20)
+        self.title_label.pack(pady=15)
 
         self.image_frame = ctk.CTkFrame(
-            self,
-            corner_radius=20,
-            fg_color=FRAME_COLOR,
-            border_width=2,
-            border_color=NEON_BLUE
+            self, corner_radius=20, fg_color=FRAME_COLOR,
+            border_width=2, border_color=NEON_BLUE
         )
-        self.image_frame.pack(pady=15, padx=25, fill="x")
+        self.image_frame.pack(pady=12, padx=25, fill="x")
 
         ctk.CTkLabel(
-            self.image_frame,
-            text="📁 Изображения для видео",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=NEON_CYAN
-        ).pack(pady=(15, 10))
+            self.image_frame, text="📁 Изображения",
+            font=ctk.CTkFont(size=15, weight="bold"), text_color=NEON_CYAN
+        ).pack(pady=(12, 8))
 
         btn_frame = ctk.CTkFrame(self.image_frame, fg_color="transparent")
         btn_frame.pack(pady=5, padx=15, fill="x")
 
         self.add_btn = ctk.CTkButton(
-            btn_frame,
-            text="➕ Добавить",
-            command=self.add_images,
-            fg_color=NEON_BLUE,
-            hover_color="#0088ff",
-            border_width=2,
-            border_color=NEON_CYAN,
-            text_color=TEXT_COLOR,
-            corner_radius=12,
-            width=180,
-            height=40,
-            font=ctk.CTkFont(size=14, weight="bold")
+            btn_frame, text="➕ Добавить", command=self.add_images,
+            fg_color=NEON_BLUE, hover_color="#0088ff",
+            border_width=2, border_color=NEON_CYAN, text_color=TEXT_COLOR,
+            corner_radius=12, width=170, height=38,
+            font=ctk.CTkFont(size=13, weight="bold")
         )
         self.add_btn.pack(side="left", padx=10, pady=5)
 
         self.clear_btn = ctk.CTkButton(
-            btn_frame,
-            text="🗑 Очистить",
-            command=self.clear_images,
-            fg_color=NEON_PINK,
-            hover_color="#ff3388",
-            border_width=2,
-            border_color="#ff66aa",
-            text_color=TEXT_COLOR,
-            corner_radius=12,
-            width=180,
-            height=40,
-            font=ctk.CTkFont(size=14, weight="bold")
+            btn_frame, text=" Очистить", command=self.clear_images,
+            fg_color=NEON_PINK, hover_color="#ff3388",
+            border_width=2, border_color="#ff66aa", text_color=TEXT_COLOR,
+            corner_radius=12, width=170, height=38,
+            font=ctk.CTkFont(size=13, weight="bold")
         )
         self.clear_btn.pack(side="right", padx=10, pady=5)
 
-        # Список файлов
         self.list_frame = ctk.CTkScrollableFrame(
-            self.image_frame,
-            corner_radius=12,
-            fg_color="#0d1120",
-            border_width=1,
-            border_color=NEON_BLUE
+            self.image_frame, corner_radius=12, fg_color="#0d1120",
+            border_width=1, border_color=NEON_BLUE, height=160
         )
-        self.list_frame.pack(pady=10, padx=15, fill="both", expand=True)
-        self.list_frame.configure(height=180)
+        self.list_frame.pack(pady=8, padx=15, fill="both", expand=True)
 
         self.files_label = ctk.CTkLabel(
-            self.list_frame,
-            text="Файлы не выбраны",
-            text_color="#666666",
-            font=ctk.CTkFont(size=13)
+            self.list_frame, text="Файлы не выбраны",
+            text_color="#666666", font=ctk.CTkFont(size=13)
         )
-        self.files_label.pack(pady=20)
+        self.files_label.pack(pady=15)
 
         self.image_count_label = ctk.CTkLabel(
-            self.image_frame,
-            text="Выбрано: 0 изображений",
-            text_color=NEON_CYAN,
-            font=ctk.CTkFont(size=13, weight="bold")
+            self.image_frame, text="Выбрано: 0 изображений",
+            text_color=NEON_CYAN, font=ctk.CTkFont(size=12, weight="bold")
         )
-        self.image_count_label.pack(pady=8)
+        self.image_count_label.pack(pady=5)
 
         self.audio_frame = ctk.CTkFrame(
-            self,
-            corner_radius=20,
-            fg_color=FRAME_COLOR,
-            border_width=2,
-            border_color=NEON_PURPLE
+            self, corner_radius=20, fg_color=FRAME_COLOR,
+            border_width=2, border_color=NEON_PURPLE
         )
-        self.audio_frame.pack(pady=15, padx=25, fill="x")
+        self.audio_frame.pack(pady=12, padx=25, fill="x")
 
         ctk.CTkLabel(
-            self.audio_frame,
-            text="🎵 Аудиофайл",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=NEON_CYAN
-        ).pack(pady=(15, 10))
+            self.audio_frame, text=" Аудиофайл",
+            font=ctk.CTkFont(size=15, weight="bold"), text_color=NEON_CYAN
+        ).pack(pady=(12, 8))
 
         self.audio_entry = ctk.CTkEntry(
-            self.audio_frame,
-            textvariable=self.audio_file_path,
-            placeholder_text="Файл не выбран...",
-            state="readonly",
-            corner_radius=12,
-            border_width=2,
-            border_color=NEON_PURPLE,
-            fg_color="#0d1120",
-            text_color=TEXT_COLOR,
-            font=ctk.CTkFont(size=13)
+            self.audio_frame, textvariable=self.audio_file_path,
+            placeholder_text="Файл не выбран...", state="readonly",
+            corner_radius=12, border_width=2, border_color=NEON_PURPLE,
+            fg_color="#0d1120", text_color=TEXT_COLOR,
+            font=ctk.CTkFont(size=12)
         )
         self.audio_entry.pack(pady=5, padx=15, fill="x")
 
+        audio_btn_frame = ctk.CTkFrame(self.audio_frame, fg_color="transparent")
+        audio_btn_frame.pack(pady=8, padx=15, fill="x")
+
         self.audio_btn = ctk.CTkButton(
-            self.audio_frame,
-            text="Выбрать аудио",
+            audio_btn_frame, text=" Выбрать аудио",
             command=self.select_audio_file,
-            fg_color=NEON_PURPLE,
-            hover_color="#cc33ff",
-            border_width=2,
-            border_color=NEON_CYAN,
-            text_color=TEXT_COLOR,
-            corner_radius=12,
-            width=200,
-            height=40,
-            font=ctk.CTkFont(size=14, weight="bold")
+            fg_color=NEON_PURPLE, hover_color="#cc33ff",
+            border_width=2, border_color=NEON_CYAN, text_color=TEXT_COLOR,
+            corner_radius=12, width=180, height=38,
+            font=ctk.CTkFont(size=13, weight="bold")
         )
-        self.audio_btn.pack(pady=10)
+        self.audio_btn.pack(side="left", padx=10, pady=5)
+
+        self.remove_audio_btn = ctk.CTkButton(
+            audio_btn_frame, text="✕ Удалить",
+            command=self.remove_audio,
+            fg_color=NEON_PINK, hover_color="#ff3388",
+            border_width=2, border_color="#ff66aa", text_color=TEXT_COLOR,
+            corner_radius=12, width=180, height=38,
+            font=ctk.CTkFont(size=13, weight="bold")
+        )
+        self.remove_audio_btn.pack(side="right", padx=10, pady=5)
 
         self.generate_btn = ctk.CTkButton(
-            self,
-            text="🎬 СОЗДАТЬ ВИДЕО",
-            font=ctk.CTkFont(size=22, weight="bold"),
+            self, text="🎬 СОЗДАТЬ ВИДЕО",
+            font=ctk.CTkFont(size=20, weight="bold"),
             command=self.start_generation,
-            fg_color=NEON_GREEN,
-            hover_color="#33ffaa",
-            border_width=3,
-            border_color=NEON_CYAN,
-            text_color="#000000",
-            corner_radius=18,
-            height=65,
-            width=350
+            fg_color=NEON_GREEN, hover_color="#33ffaa",
+            border_width=3, border_color=NEON_CYAN, text_color="#000000",
+            corner_radius=18, height=60, width=330
         )
-        self.generate_btn.pack(pady=25)
+        self.generate_btn.pack(pady=20)
 
         self.progress_frame = ctk.CTkFrame(
-            self,
-            corner_radius=15,
-            fg_color=FRAME_COLOR,
-            border_width=1,
-            border_color=NEON_BLUE
+            self, corner_radius=15, fg_color=FRAME_COLOR,
+            border_width=1, border_color=NEON_BLUE
         )
-        self.progress_frame.pack(pady=10, padx=25, fill="x")
+        self.progress_frame.pack(pady=8, padx=25, fill="x")
 
         self.progress_bar = ctk.CTkProgressBar(
-            self.progress_frame,
-            orientation="horizontal",
-            mode="determinate",
-            fg_color=NEON_GREEN,
-            progress_color=NEON_CYAN,
-            height=20,
-            corner_radius=10
+            self.progress_frame, orientation="horizontal", mode="determinate",
+            fg_color="#1a2e1a", progress_color=NEON_CYAN,
+            height=18, corner_radius=10
         )
-        self.progress_bar.pack(pady=15, padx=15, fill="x")
+        self.progress_bar.pack(pady=12, padx=15, fill="x")
         self.progress_bar.set(0)
 
         self.status_label = ctk.CTkLabel(
-            self,
-            text="Готов к работе. Добавьте изображения и аудио.",
-            text_color=TEXT_COLOR,
-            font=ctk.CTkFont(size=13)
+            self, text="Готов к работе. Добавьте изображения и аудио.",
+            text_color=TEXT_COLOR, font=ctk.CTkFont(size=12)
         )
-        self.status_label.pack(pady=10)
+        self.status_label.pack(pady=8)
 
     def add_images(self):
         files = filedialog.askopenfilenames(
             title="Выберите изображения",
             filetypes=[("Image files", "*.jpg *.jpeg *.png")]
         )
-
         if files:
             self.selected_images.extend(files)
             self.update_files_list()
-            self.update_status(f"✓ Добавлено изображений: {len(files)}")
+            self.update_status(f"✓ Добавлено: {len(files)} изобр.")
 
     def clear_images(self):
         self.selected_images = []
         self.update_files_list()
-        self.update_status("Список очищен")
+        self.update_status("Список изображений очищен")
+
+    def remove_audio(self):
+        """🆕 Очищает выбранный аудиофайл"""
+        self.audio_file_path.set("")
+        self.update_status("Аудио удалено")
 
     def update_files_list(self):
         for widget in self.list_frame.winfo_children():
@@ -231,29 +189,22 @@ class VerticalVideoApp(ctk.CTk):
 
         if not self.selected_images:
             ctk.CTkLabel(
-                self.list_frame,
-                text="Файлы не выбраны",
-                text_color="#666666",
-                font=ctk.CTkFont(size=13)
-            ).pack(pady=20)
+                self.list_frame, text="Файлы не выбраны",
+                text_color="#666666", font=ctk.CTkFont(size=13)
+            ).pack(pady=15)
         else:
             for i, file_path in enumerate(self.selected_images, 1):
                 file_name = os.path.basename(file_path)
-                file_label = ctk.CTkLabel(
-                    self.list_frame,
-                    text=f"{i}. {file_name}",
-                    text_color=TEXT_COLOR,
-                    justify="left",
-                    anchor="w",
+                ctk.CTkLabel(
+                    self.list_frame, text=f"{i}. {file_name}",
+                    text_color=TEXT_COLOR, justify="left", anchor="w",
                     font=ctk.CTkFont(size=12)
-                )
-                file_label.pack(pady=3, padx=10, fill="x")
+                ).pack(pady=2, padx=10, fill="x")
 
         count = len(self.selected_images)
         if count > 0:
-            total_duration = count * 4
             self.image_count_label.configure(
-                text=f"Выбрано: {count} изобр. (~{total_duration} сек.)"
+                text=f"Выбрано: {count} изобр. (~{count * 4} сек.)"
             )
         else:
             self.image_count_label.configure(text="Выбрано: 0 изображений")
@@ -265,7 +216,7 @@ class VerticalVideoApp(ctk.CTk):
         )
         if file:
             self.audio_file_path.set(file)
-            self.update_status(f"✓ Аудио выбрано: {os.path.basename(file)}")
+            self.update_status(f"✓ Аудио: {os.path.basename(file)}")
 
     def update_status(self, text):
         self.status_label.configure(text=text)
@@ -276,21 +227,20 @@ class VerticalVideoApp(ctk.CTk):
     def start_generation(self):
         if self.is_generating:
             return
-
         if not self.selected_images:
-            messagebox.showwarning("Внимание", "Добавьте хотя бы одно изображение!")
+            messagebox.showwarning("Внимание", "Добавьте изображения!")
             return
-
         audio_path = self.audio_file_path.get()
         if not audio_path:
             messagebox.showwarning("Внимание", "Выберите аудиофайл!")
             return
 
         self.is_generating = True
-        self.generate_btn.configure(state="disabled", text="⏳ Генерация...")
+        self.generate_btn.configure(state="disabled", text=" Генерация...")
         self.add_btn.configure(state="disabled")
         self.clear_btn.configure(state="disabled")
         self.audio_btn.configure(state="disabled")
+        self.remove_audio_btn.configure(state="disabled")
         self.progress_bar.set(0)
 
         output_path = os.path.join("output", "final_video.mp4")
@@ -305,29 +255,27 @@ class VerticalVideoApp(ctk.CTk):
     def run_engine(self, image_list, audio_path, output_path):
         try:
             success = create_video(
-                image_list,
-                audio_path,
-                output_path,
+                image_list, audio_path, output_path,
                 status_callback=self.update_status,
                 progress_callback=self.update_progress
             )
-
             if success:
                 self.after(0, lambda: messagebox.showinfo(
                     "✓ Успех!",
-                    f"Видео создано!\n\nПуть: {os.path.abspath(output_path)}\nИзображений: {len(image_list)}"
+                    f"Видео создано!\n\n{os.path.abspath(output_path)}"
                 ))
         except Exception as e:
-            self.after(0, lambda: messagebox.showerror("Ошибка", f"Произошла ошибка:\n{str(e)}"))
+            self.after(0, lambda: messagebox.showerror("Ошибка", str(e)))
         finally:
             self.after(0, self.finish_generation)
 
     def finish_generation(self):
         self.is_generating = False
-        self.generate_btn.configure(state="normal", text="🎬 СОЗДАТЬ ВИДЕО")
+        self.generate_btn.configure(state="normal", text=" СОЗДАТЬ ВИДЕО")
         self.add_btn.configure(state="normal")
         self.clear_btn.configure(state="normal")
         self.audio_btn.configure(state="normal")
+        self.remove_audio_btn.configure(state="normal")
 
 
 if __name__ == "__main__":
