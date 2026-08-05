@@ -1,10 +1,298 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Video Maker | SocialLift</title>
+    <style>
+        /* ================= НЕОНОВЫЕ СТИЛИ (АДАПТИВНЫЕ) ================= */
+        :root {
+            --bg-color: #0a0e1a;
+            --frame-color: #151a2e;
+            --neon-cyan: #00f5ff;
+            --neon-blue: #0066ff;
+            --neon-purple: #b000ff;
+            --neon-pink: #ff006e;
+            --neon-green: #00ff88;
+            --text-color: #e0e0e0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px; /* Ограничение ширины для ПК */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            color: var(--neon-cyan);
+            text-align: center;
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background-color: var(--frame-color);
+            border: 2px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
+        }
+
+        .card-audio {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(176, 0, 255, 0.2);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: var(--neon-cyan);
+        }
+
+        /* Стилизация инпутов файлов */
+        input[type="file"] {
+            display: none; /* Прячем стандартный инпут */
+        }
+
+        .upload-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            border: 2px solid transparent;
+        }
+
+        .btn-images {
+            background-color: var(--neon-blue);
+            color: white;
+            border-color: var(--neon-cyan);
+        }
+        .btn-images:hover { background-color: #0088ff; }
+
+        .btn-audio {
+            background-color: var(--neon-purple);
+            color: white;
+            border-color: var(--neon-cyan);
+        }
+        .btn-audio:hover { background-color: #cc33ff; }
+
+        .file-list {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #aaaaaa;
+            word-break: break-all;
+        }
+
+        /* Главная кнопка генерации */
+        .generate-btn {
+            background-color: var(--neon-green);
+            color: #000;
+            border: 3px solid var(--neon-cyan);
+            border-radius: 18px;
+            padding: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+        }
+
+        .generate-btn:disabled {
+            background-color: #333;
+            color: #777;
+            border-color: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Спиннер загрузки */
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--neon-cyan);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Блок скачивания */
+        .download-area {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(0, 255, 136, 0.1);
+            border-radius: 15px;
+            border: 1px solid var(--neon-green);
+        }
+        .download-link {
+            color: var(--neon-green);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 2px solid var(--neon-green);
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            h1 { font-size: 24px; }
+            .upload-btn, .generate-btn { padding: 15px; font-size: 16px; }
+        }
+    </style>
 </head>
 <body>
+
+<div class="container">
+    <h1> Vertical Video Maker ⚡</h1>
+
+    <!-- Блок изображений -->
+    <div class="card">
+        <h2>📁 Изображения</h2>
+        <label for="images" class="upload-btn btn-images">➕ Выбрать изображения</label>
+        <input type="file" id="images" multiple accept="image/png, image/jpeg, image/jpg">
+        <div class="file-list" id="image-list">Файлы не выбраны</div>
+    </div>
+
+    <!-- Блок аудио -->
+    <div class="card card-audio">
+        <h2>🎵 Аудиофайл</h2>
+        <label for="audio" class="upload-btn btn-audio">🎧 Выбрать музыку</label>
+        <input type="file" id="audio" accept="audio/mpeg, audio/wav">
+        <div class="file-list" id="audio-list">Файл не выбран</div>
+    </div>
+
+    <!-- Кнопка генерации -->
+    <button id="generate-btn" class="generate-btn">🎬 СОЗДАТЬ ВИДЕО</button>
+
+    <!-- Индикатор загрузки -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p>Генерация видео... Это может занять минуту.</p>
+    </div>
+
+    <!-- Ссылка на скачивание -->
+    <div class="download-area" id="download-area">
+        <p style="margin-top:0; color: var(--neon-green);">✅ Видео готово!</p>
+        <a href="#" id="download-link" class="download-link">⬇️ Скачать видео</a>
+    </div>
+</div>
+
+<script>
+    // ================= ЛОГИКА ИНТЕРФЕЙСА =================
+    const imagesInput = document.getElementById('images');
+    const audioInput = document.getElementById('audio');
+    const imageList = document.getElementById('image-list');
+    const audioList = document.getElementById('audio-list');
+    const generateBtn = document.getElementById('generate-btn');
+    const loader = document.getElementById('loader');
+    const downloadArea = document.getElementById('download-area');
+    const downloadLink = document.getElementById('download-link');
+
+    // Отображение выбранных изображений
+    imagesInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            imageList.innerHTML = `Выбрано файлов: <b>${this.files.length}</b><br>` +
+                                  Array.from(this.files).map(f => f.name).join('<br>');
+        } else {
+            imageList.innerText = 'Файлы не выбраны';
+        }
+    });
+
+    // Отображение выбранного аудио
+    audioInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            audioList.innerText = 'Выбран файл: ' + this.files[0].name;
+        } else {
+            audioList.innerText = 'Файл не выбран';
+        }
+    });
+
+    // Отправка формы на сервер
+    generateBtn.addEventListener('click', async function() {
+        // Проверка
+        if (imagesInput.files.length === 0 || audioInput.files.length === 0) {
+            alert('Пожалуйста, выберите изображения и аудиофайл!');
+            return;
+        }
+
+        // Блокируем интерфейс
+        generateBtn.disabled = true;
+        generateBtn.innerText = '⏳ Генерация...';
+        loader.style.display = 'block';
+        downloadArea.style.display = 'none';
+
+        // Собираем данные
+        const formData = new FormData();
+        for (let i = 0; i < imagesInput.files.length; i++) {
+            formData.append('images', imagesInput.files[i]);
+        }
+        formData.append('audio', audioInput.files[0]);
+
+        try {
+            // Отправляем POST запрос на наш FastAPI сервер
+            const response = await fetch('/generate', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Ошибка сервера');
+            }
+
+            // Получаем видео в виде Blob (бинарный объект)
+            const blob = await response.blob();
+            const videoUrl = URL.createObjectURL(blob);
+
+            // Показываем ссылку на скачивание
+            downloadLink.href = videoUrl;
+            downloadLink.download = 'vertical_video.mp4';
+            downloadArea.style.display = 'block';
+
+        } catch (error) {
+            alert('Ошибка: ' + error.message);
+        } finally {
+            // Возвращаем интерфейс в исходное состояние
+            generateBtn.disabled = false;
+            generateBtn.innerText = '🎬 СОЗДАТЬ ВИДЕО';
+            loader.style.display = 'none';
+        }
+    });
+</script>
 
 </body>
 </html>
