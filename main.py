@@ -209,7 +209,7 @@ def create_video(
             fps=FPS,
             codec="libx264",  # Стандартный видеокодек H.264
             audio_codec="aac",  # Стандартный аудиокодек для MP4
-            preset="superfast",  
+            preset="superfast",
             ffmpeg_params=[
                 "-movflags", "+faststart",  # Оптимизация для стриминга/соцсетей
                 "-crf", "30",
