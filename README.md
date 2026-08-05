@@ -74,6 +74,7 @@ VerticalVideoMaker/
 ├── .gitignore
 │
 ├── static/
+<<<<<<< HEAD
 │   └── index.html
 │
 ├── temp_uploads/
@@ -86,10 +87,22 @@ VerticalVideoMaker/
 # 🚀 Установка и запуск
 
 ## 1. Клонирование проекта
+=======
+│   └── index.html          # Адаптивный веб-интерфейс (HTML/CSS/JS)
+├── temp_uploads/           # Временная папка для загруженных файлов (создаётся автоматически)
+
+
+---
+
+## 🚀 Установка и запуск
+
+### Шаг 1: Скачивание проекта
+>>>>>>> 7a38b4b9ea179075d57f9bb7b44a418867dc09ef
 
 ```bash
 git clone https://github.com/LadyOwl/VerticalVideoMaker.git
 cd VerticalVideoMaker
+<<<<<<< HEAD
 ```
 
 ---
@@ -225,3 +238,67 @@ pip install imageio-ffmpeg
 Проект разработан по индивидуальному заказу.
 
 Все права принадлежат заказчику.
+=======
+
+Шаг 2: Создание виртуального окружения
+Windows:
+python -m venv .venv
+.venv\Scripts\activate
+
+macOS/Linux:
+python -m venv .venv
+source .venv/bin/activate
+
+Шаг 3: Установка зависимостей
+bash
+1 pip install -r requirements.txt
+Шаг 4: Запуск веб-приложения
+bash
+1 uvicorn server:app --reload
+Откройте браузер: http://127.0.0.1:8000
+Альтернатива: десктопная версия
+bash
+1 python gui.py
+📦 Создание .exe файла (опционально)
+bash
+1 pip install pyinstaller
+2 pyinstaller --noconfirm --onefile --windowed --name "VerticalVideoMaker" gui.py
+⚠️ Решение проблем
+Антивирус блокирует программу
+Решение: Добавьте папку проекта в исключения антивируса.
+Ошибка ffmpeg not found
+bash
+1 pip install imageio-ffmpeg
+Медленный рендеринг
+Закройте другие приложения. В main.py уже применены оптимизации (preset="ultrafast").
+✅ Соответствие ТЗ
+Форматы: .jpg, .png, .mp3, .wav
+Разрешение: 1080x1920
+Длительность кадра: 4 секунды
+Автоподгонка аудио
+Экспорт в .mp4 (24 FPS)
+Веб-интерфейс с прогресс-баром
+Код с комментариями (PEP8)
+Модульная структура
+README с инструкцией
+requirements.txt
+.gitignore
+👨‍💻 Автор
+Разработано для SocialLift Studio.
+📄 Лицензия
+Проект создан по индивидуальному заказу. Все права принадлежат заказчику.
+
+
+
+
+
+
+
+
+
+
+
+
+└── output/          
+        
+>>>>>>> 7a38b4b9ea179075d57f9bb7b44a418867dc09ef
