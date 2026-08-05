@@ -21,7 +21,8 @@ TARGET_HEIGHT = 1920
 FRAME_DURATION = 4
 
 # Частота кадров в секунду (стандарт для соцсетей)
-FPS = 30
+# 24 FPS достаточно для слайд-шоу и экономит время рендеринга
+FPS = 24
 
 
 # =========================================================
@@ -177,7 +178,7 @@ def create_video(
     video_duration = final_video.duration
 
     # 4. Обработка и наложение аудио
-    log("🎵 Подключение аудио...")
+    log(" Подключение аудио...")
     try:
         audio = AudioFileClip(audio_path)
 
@@ -198,14 +199,23 @@ def create_video(
     update_progress(60)
 
     try:
+        # 🔥 ОПТИМИЗАЦИЯ ДЛЯ УСКОРЕНИЯ РЕНДЕРИНГА:
+        # preset="ultrafast" - самый быстрый пресет (в 5-10 раз быстрее medium)
+        # crf="28" - качество (28 = чуть ниже стандартного, но для соцсетей незаметно)
+        # threads="0" - использовать все ядра процессора
+
         final_video.write_videofile(
             output_path,
             fps=FPS,
             codec="libx264",  # Стандартный видеокодек H.264
             audio_codec="aac",  # Стандартный аудиокодек для MP4
-            preset="medium",  # Баланс между скоростью и качеством
-            ffmpeg_params=["-movflags", "+faststart"],  # Оптимизация для стриминга/соцсетей
-            logger=None  # Отключаем вывод ffmpeg в консоль, чтобы не засорять GUI
+            preset="ultrafast",  # 🔥 САМОЕ ВАЖНОЕ: ultrafast вместо medium
+            ffmpeg_params=[
+                "-movflags", "+faststart",  # Оптимизация для стриминга/соцсетей
+                "-crf", "28",  # Качество: 28 (быстрее, чем 23)
+                "-threads", "0"  # Использовать все ядра CPU
+            ],
+            logger=None  # Отключаем вывод ffmpeg в консоль
         )
         update_progress(100)
         log(f"✅ Готово! Видео сохранено: {output_path}")
