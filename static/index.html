@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vertical Video Maker | SocialLift</title>
     <style>
-        /* ================= НЕОНОВЫЕ СТИЛИ (АДАПТИВНЫЕ) ================= */
+        /* ================= НЕОНОВЫЕ СТИЛИ ================= */
         :root {
             --bg-color: #0a0e1a;
             --frame-color: #151a2e;
@@ -30,7 +30,7 @@
 
         .container {
             width: 100%;
-            max-width: 600px; /* Ограничение ширины для ПК */
+            max-width: 600px;
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -52,21 +52,11 @@
             box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
         }
 
-        .card-audio {
-            border-color: var(--neon-purple);
-            box-shadow: 0 0 15px rgba(176, 0, 255, 0.2);
-        }
+        .card-audio { border-color: var(--neon-purple); box-shadow: 0 0 15px rgba(176, 0, 255, 0.2); }
 
-        h2 {
-            margin-top: 0;
-            font-size: 18px;
-            color: var(--neon-cyan);
-        }
+        h2 { margin-top: 0; font-size: 18px; color: var(--neon-cyan); }
 
-        /* Стилизация инпутов файлов */
-        input[type="file"] {
-            display: none; /* Прячем стандартный инпут */
-        }
+        input[type="file"] { display: none; }
 
         .upload-btn {
             display: block;
@@ -82,28 +72,87 @@
             border: 2px solid transparent;
         }
 
-        .btn-images {
-            background-color: var(--neon-blue);
-            color: white;
-            border-color: var(--neon-cyan);
-        }
+        .btn-images { background-color: var(--neon-blue); color: white; border-color: var(--neon-cyan); }
         .btn-images:hover { background-color: #0088ff; }
-
-        .btn-audio {
-            background-color: var(--neon-purple);
-            color: white;
-            border-color: var(--neon-cyan);
-        }
+        .btn-audio { background-color: var(--neon-purple); color: white; border-color: var(--neon-cyan); }
         .btn-audio:hover { background-color: #cc33ff; }
 
-        .file-list {
+        /* Список файлов с кнопками удаления */
+        .file-list-container {
             margin-top: 15px;
-            font-size: 14px;
-            color: #aaaaaa;
-            word-break: break-all;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
-        /* Главная кнопка генерации */
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
+            flex-grow: 1;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--neon-pink);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 5px;
+            font-weight: bold;
+        }
+        .remove-btn:hover { color: #ff3388; text-shadow: 0 0 5px var(--neon-pink); }
+
+        /* Прогресс-бар */
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            height: 24px;
+            overflow: hidden;
+            border: 1px solid var(--neon-cyan);
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* Главная кнопка */
         .generate-btn {
             background-color: var(--neon-green);
             color: #000;
@@ -117,36 +166,8 @@
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
         }
-
-        .generate-btn:hover:not(:disabled) {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
-        }
-
-        .generate-btn:disabled {
-            background-color: #333;
-            color: #777;
-            border-color: #555;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* Спиннер загрузки */
-        .loader {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-left-color: var(--neon-cyan);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .generate-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
+        .generate-btn:disabled { background-color: #333; color: #777; border-color: #555; cursor: not-allowed; box-shadow: none; }
 
         /* Блок скачивания */
         .download-area {
@@ -159,32 +180,38 @@
             border: 1px solid var(--neon-green);
         }
         .download-link {
-            color: var(--neon-green);
+            display: inline-block;
+            margin-top: 10px;
+            padding: 12px 24px;
+            background-color: var(--neon-green);
+            color: #000;
             text-decoration: none;
             font-size: 18px;
             font-weight: bold;
-            border-bottom: 2px solid var(--neon-green);
+            border-radius: 12px;
+            border: 2px solid var(--neon-cyan);
         }
+        .download-link:hover { background-color: #33ffaa; }
 
-        /* Адаптивность для мобильных */
         @media (max-width: 600px) {
             body { padding: 10px; }
             h1 { font-size: 24px; }
-            .upload-btn, .generate-btn { padding: 15px; font-size: 16px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1> Vertical Video Maker ⚡</h1>
+    <h1>⚡ Vertical Video Maker </h1>
 
     <!-- Блок изображений -->
     <div class="card">
         <h2>📁 Изображения</h2>
         <label for="images" class="upload-btn btn-images">➕ Выбрать изображения</label>
         <input type="file" id="images" multiple accept="image/png, image/jpeg, image/jpg">
-        <div class="file-list" id="image-list">Файлы не выбраны</div>
+        <div class="file-list-container" id="image-list">
+            <div style="color: #666; text-align: center; padding: 10px;">Файлы не выбраны</div>
+        </div>
     </div>
 
     <!-- Блок аудио -->
@@ -192,22 +219,24 @@
         <h2>🎵 Аудиофайл</h2>
         <label for="audio" class="upload-btn btn-audio">🎧 Выбрать музыку</label>
         <input type="file" id="audio" accept="audio/mpeg, audio/wav">
-        <div class="file-list" id="audio-list">Файл не выбран</div>
+        <div class="file-list-container" id="audio-list">
+            <div style="color: #666; text-align: center; padding: 10px;">Файл не выбран</div>
+        </div>
     </div>
 
     <!-- Кнопка генерации -->
     <button id="generate-btn" class="generate-btn">🎬 СОЗДАТЬ ВИДЕО</button>
 
-    <!-- Индикатор загрузки -->
-    <div class="loader" id="loader">
-        <div class="spinner"></div>
-        <p>Генерация видео... Это может занять минуту.</p>
+    <!-- Шкала прогресса -->
+    <div class="progress-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-text" id="progress-text">0%</div>
     </div>
 
     <!-- Ссылка на скачивание -->
     <div class="download-area" id="download-area">
-        <p style="margin-top:0; color: var(--neon-green);">✅ Видео готово!</p>
-        <a href="#" id="download-link" class="download-link">⬇️ Скачать видео</a>
+        <p style="margin-top:0; color: var(--neon-green); font-size: 18px;">✅ Видео готово!</p>
+        <a href="#" id="download-link" class="download-link" download="vertical_video.mp4">⬇️ СКАЧАТЬ ВИДЕО</a>
     </div>
 </div>
 
@@ -215,83 +244,159 @@
     // ================= ЛОГИКА ИНТЕРФЕЙСА =================
     const imagesInput = document.getElementById('images');
     const audioInput = document.getElementById('audio');
-    const imageList = document.getElementById('image-list');
-    const audioList = document.getElementById('audio-list');
+    const imageListContainer = document.getElementById('image-list');
+    const audioListContainer = document.getElementById('audio-list');
     const generateBtn = document.getElementById('generate-btn');
-    const loader = document.getElementById('loader');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
     const downloadArea = document.getElementById('download-area');
     const downloadLink = document.getElementById('download-link');
 
-    // Отображение выбранных изображений
+    // Хранилище выбранных файлов
+    let selectedImages = [];
+    let selectedAudio = null;
+
+    // --- Управление изображениями ---
     imagesInput.addEventListener('change', function() {
-        if (this.files.length > 0) {
-            imageList.innerHTML = `Выбрано файлов: <b>${this.files.length}</b><br>` +
-                                  Array.from(this.files).map(f => f.name).join('<br>');
-        } else {
-            imageList.innerText = 'Файлы не выбраны';
+        for (let file of this.files) {
+            // Проверка на дубликаты
+            if (!selectedImages.some(f => f.name === file.name && f.size === file.size)) {
+                selectedImages.push(file);
+            }
         }
+        renderImageList();
+        this.value = ''; // Сброс инпута, чтобы можно было выбрать те же файлы снова
     });
 
-    // Отображение выбранного аудио
+    function renderImageList() {
+        imageListContainer.innerHTML = '';
+        if (selectedImages.length === 0) {
+            imageListContainer.innerHTML = '<div style="color: #666; text-align: center; padding: 10px;">Файлы не выбраны</div>';
+            return;
+        }
+        selectedImages.forEach((file, index) => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.innerHTML = `
+                <span class="file-name">${index + 1}. ${file.name}</span>
+                <button class="remove-btn" onclick="removeImage(${index})">✕</button>
+            `;
+            imageListContainer.appendChild(item);
+        });
+    }
+
+    window.removeImage = function(index) {
+        selectedImages.splice(index, 1);
+        renderImageList();
+    }
+
+    // --- Управление аудио ---
     audioInput.addEventListener('change', function() {
         if (this.files.length > 0) {
-            audioList.innerText = 'Выбран файл: ' + this.files[0].name;
-        } else {
-            audioList.innerText = 'Файл не выбран';
+            selectedAudio = this.files[0];
+            renderAudioList();
         }
+        this.value = '';
     });
 
-    // Отправка формы на сервер
+    function renderAudioList() {
+        audioListContainer.innerHTML = '';
+        if (!selectedAudio) {
+            audioListContainer.innerHTML = '<div style="color: #666; text-align: center; padding: 10px;">Файл не выбран</div>';
+            return;
+        }
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `
+            <span class="file-name">🎵 ${selectedAudio.name}</span>
+            <button class="remove-btn" onclick="removeAudio()">✕</button>
+        `;
+        audioListContainer.appendChild(item);
+    }
+
+    window.removeAudio = function() {
+        selectedAudio = null;
+        renderAudioList();
+    }
+
+    // --- Генерация и прогресс-бар ---
     generateBtn.addEventListener('click', async function() {
-        // Проверка
-        if (imagesInput.files.length === 0 || audioInput.files.length === 0) {
+        if (selectedImages.length === 0 || !selectedAudio) {
             alert('Пожалуйста, выберите изображения и аудиофайл!');
             return;
         }
 
         // Блокируем интерфейс
         generateBtn.disabled = true;
-        generateBtn.innerText = '⏳ Генерация...';
-        loader.style.display = 'block';
         downloadArea.style.display = 'none';
+        progressContainer.style.display = 'block';
+        updateProgress(0, 'Подготовка файлов...');
 
-        // Собираем данные
         const formData = new FormData();
-        for (let i = 0; i < imagesInput.files.length; i++) {
-            formData.append('images', imagesInput.files[i]);
-        }
-        formData.append('audio', audioInput.files[0]);
+        selectedImages.forEach(img => formData.append('images', img));
+        formData.append('audio', selectedAudio);
 
         try {
-            // Отправляем POST запрос на наш FastAPI сервер
-            const response = await fetch('/generate', {
-                method: 'POST',
-                body: formData
-            });
+            // Используем XMLHttpRequest для отслеживания реального прогресса ЗАГРУЗКИ
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/generate');
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Ошибка сервера');
-            }
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 50); // Загрузка занимает первые 50%
+                    updateProgress(percent, `Загрузка файлов: ${percent}%`);
+                }
+            };
 
-            // Получаем видео в виде Blob (бинарный объект)
-            const blob = await response.blob();
-            const videoUrl = URL.createObjectURL(blob);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    updateProgress(100, 'Готово!');
+                    const blob = new Blob([xhr.response], { type: 'video/mp4' });
+                    const videoUrl = URL.createObjectURL(blob);
+                    downloadLink.href = videoUrl;
+                    downloadArea.style.display = 'block';
+                } else {
+                    alert('Ошибка сервера: ' + xhr.responseText);
+                    resetUI();
+                }
+            };
 
-            // Показываем ссылку на скачивание
-            downloadLink.href = videoUrl;
-            downloadLink.download = 'vertical_video.mp4';
-            downloadArea.style.display = 'block';
+            xhr.onerror = function() {
+                alert('Ошибка сети');
+                resetUI();
+            };
+
+            xhr.responseType = 'blob';
+            xhr.send(formData);
+
+            // Имитация прогресса ОБРАБОТКИ после загрузки (так как сервер не шлёт проценты рендера)
+            let fakeProgress = 50;
+            const interval = setInterval(() => {
+                if (fakeProgress < 95 && xhr.readyState !== 4) {
+                    fakeProgress += Math.random() * 5;
+                    updateProgress(Math.round(fakeProgress), '🎬 Генерация видео...');
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1000);
 
         } catch (error) {
             alert('Ошибка: ' + error.message);
-        } finally {
-            // Возвращаем интерфейс в исходное состояние
-            generateBtn.disabled = false;
-            generateBtn.innerText = '🎬 СОЗДАТЬ ВИДЕО';
-            loader.style.display = 'none';
+            resetUI();
         }
     });
+
+    function updateProgress(percent, text) {
+        progressBar.style.width = percent + '%';
+        progressText.innerText = text || percent + '%';
+    }
+
+    function resetUI() {
+        generateBtn.disabled = false;
+        progressContainer.style.display = 'none';
+        progressBar.style.width = '0%';
+    }
 </script>
 
 </body>
