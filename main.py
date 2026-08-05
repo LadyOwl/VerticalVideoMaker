@@ -209,10 +209,10 @@ def create_video(
             fps=FPS,
             codec="libx264",  # Стандартный видеокодек H.264
             audio_codec="aac",  # Стандартный аудиокодек для MP4
-            preset="ultrafast",  # 🔥 САМОЕ ВАЖНОЕ: ultrafast вместо medium
+            preset="superfast",  
             ffmpeg_params=[
                 "-movflags", "+faststart",  # Оптимизация для стриминга/соцсетей
-                "-crf", "28",  # Качество: 28 (быстрее, чем 23)
+                "-crf", "30",
                 "-threads", "0"  # Использовать все ядра CPU
             ],
             logger=None  # Отключаем вывод ffmpeg в консоль
