@@ -1,10 +1,22 @@
-input_images/
-input_audio/
+# Исключения для IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Исключения для сборки PyInstaller
+build/
+dist/
+*.spec
+
+# Временные файлы и медиа (уже были, но для полноты)
+__pycache__/
+*.pyc
+temp/
+temp_uploads/
 output/
 *.mp4
 *.wav
 *.mp3
-
-__pycache__/
-*.pyc
-temp/
+input_images/
+input_audio/
