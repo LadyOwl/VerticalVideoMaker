@@ -1,17 +1,17 @@
 import os
 import shutil
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
 import uuid
 import asyncio
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 # Импортируем наш движок
 from main import create_video
 
 app = FastAPI(title="Vertical Video Maker API")
 
-# Папка для временных файлов и готовых видео
+# Папки для временных файлов и готовых видео
 TEMP_DIR = "temp_uploads"
 OUTPUT_DIR = "output"
 os.makedirs(TEMP_DIR, exist_ok=True)
@@ -33,10 +33,7 @@ async def generate_video(
         images: list[UploadFile] = File(...),
         audio: UploadFile = File(...)
 ):
-    """
-    Принимает картинки и аудио, создает видео и возвращает файл.
-    """
-    # 1. Генерируем уникальное имя для временной папки, чтобы не было конфликтов
+    # Генерируем уникальное имя сессии
     session_id = str(uuid.uuid4())
     session_dir = os.path.join(TEMP_DIR, session_id)
     os.makedirs(session_dir, exist_ok=True)
@@ -45,47 +42,54 @@ async def generate_video(
     audio_path = None
 
     try:
-        # 2. Сохраняем загруженные картинки
+        # 1. Сохраняем картинки
         for img in images:
-            # Проверяем расширение
             if img.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-                file_path = os.path.join(session_dir, img.filename)
+                # Очищаем имя файла от спецсимволов, чтобы не было ошибок пути
+                safe_filename = "".join(c for c in img.filename if c.isalnum() or c in "._- ")
+                file_path = os.path.join(session_dir, safe_filename)
+
                 with open(file_path, "wb") as f:
                     shutil.copyfileobj(img.file, f)
                 image_paths.append(file_path)
             else:
-                raise HTTPException(status_code=400, detail=f"Неподдерживаемый формат картинки: {img.filename}")
+                raise HTTPException(status_code=400, detail=f"Неподдерживаемый формат: {img.filename}")
 
         if not image_paths:
             raise HTTPException(status_code=400, detail="Не загружено ни одного изображения")
 
-        # 3. Сохраняем аудио
+        # 2. Сохраняем аудио
         if audio.filename.lower().endswith(('.mp3', '.wav')):
-            audio_path = os.path.join(session_dir, audio.filename)
+            safe_audio_name = "".join(c for c in audio.filename if c.isalnum() or c in "._- ")
+            audio_path = os.path.join(session_dir, safe_audio_name)
             with open(audio_path, "wb") as f:
                 shutil.copyfileobj(audio.file, f)
         else:
             raise HTTPException(status_code=400, detail="Неподдерживаемый формат аудио")
 
-        # 4. Формируем путь для готового видео
+        # 3. Путь для готового видео
         output_filename = f"video_{session_id}.mp4"
         output_path = os.path.join(OUTPUT_DIR, output_filename)
 
-        # 5. Запускаем генерацию в отдельном потоке, чтобы не блокировать сервер
-        # (create_video - синхронная функция)
-        loop = asyncio.get_event_loop()
-        success = await loop.run_in_executor(
-            None,
-            create_video,
-            image_paths,
-            audio_path,
-            output_path
-        )
+        # 4. Запуск генерации в отдельном потоке
+        try:
+            # ИСПРАВЛЕНИЕ: используем get_running_loop() для стабильности
+            loop = asyncio.get_running_loop()
+            success = await loop.run_in_executor(
+                None,
+                create_video,
+                image_paths,
+                audio_path,
+                output_path
+            )
+        except Exception as e:
+            print(f"ОШИБКА В ПОТОКЕ ГЕНЕРАЦИИ: {e}")
+            raise HTTPException(status_code=500, detail=f"Ошибка движка MoviePy: {str(e)}")
 
         if not success:
-            raise HTTPException(status_code=500, detail="Ошибка при создании видео. Проверьте логи.")
+            raise HTTPException(status_code=500, detail="Ошибка при создании видео.")
 
-        # 6. Возвращаем готовый видеофайл пользователю
+        # 5. Возвращаем файл пользователю
         return FileResponse(
             path=output_path,
             media_type="video/mp4",
@@ -95,8 +99,9 @@ async def generate_video(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Внутренняя ошибка сервера: {str(e)}")
+        print(f"ОБЩАЯ ОШИБКА СЕРВЕРА: {e}")
+        raise HTTPException(status_code=500, detail=f"Внутренняя ошибка: {str(e)}")
 
     finally:
-        # 7. Очистка временных файлов (безопасность и экономия места)
+        # Очистка временных файлов (безопасность)
         shutil.rmtree(session_dir, ignore_errors=True)
