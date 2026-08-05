@@ -11,13 +11,21 @@ from main import create_video
 
 app = FastAPI(title="Vertical Video Maker API")
 
-# Папки для временных файлов и готовых видео
+# ================= НАСТРОЙКИ БЕЗОПАСНОСТИ И ЛИМИТЫ =================
+MAX_IMAGES_COUNT = 50  # Максимальное количество изображений за один запрос
+MAX_FILE_SIZE_MB = 50  # Максимальный размер одного файла в МБ
+MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+
+# Разрешенные MIME-типы (строгая проверка содержимого, а не только расширения)
+ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/jpg"}
+ALLOWED_AUDIO_MIMES = {"audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp3"}
+# ===================================================================
+
 TEMP_DIR = "temp_uploads"
 OUTPUT_DIR = "output"
 os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Подключаем папку со статикой (HTML, CSS)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
@@ -33,7 +41,16 @@ async def generate_video(
         images: list[UploadFile] = File(...),
         audio: UploadFile = File(...)
 ):
-    # Генерируем уникальное имя сессии
+    # 1. Проверка лимита количества файлов
+    if len(images) > MAX_IMAGES_COUNT:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Слишком много изображений. Максимум: {MAX_IMAGES_COUNT}"
+        )
+
+    if not images:
+        raise HTTPException(status_code=400, detail="Не загружено ни одного изображения")
+
     session_id = str(uuid.uuid4())
     session_dir = os.path.join(TEMP_DIR, session_id)
     os.makedirs(session_dir, exist_ok=True)
@@ -42,38 +59,62 @@ async def generate_video(
     audio_path = None
 
     try:
-        # 1. Сохраняем картинки
+        # 2. Обработка и проверка изображений
         for img in images:
-            if img.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-                # Очищаем имя файла от спецсимволов, чтобы не было ошибок пути
-                safe_filename = "".join(c for c in img.filename if c.isalnum() or c in "._- ")
-                file_path = os.path.join(session_dir, safe_filename)
+            # Проверка MIME-типа
+            if img.content_type not in ALLOWED_IMAGE_MIMES:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Недопустимый формат файла '{img.filename}'. Разрешены только изображения (JPEG, PNG)."
+                )
 
-                with open(file_path, "wb") as f:
-                    shutil.copyfileobj(img.file, f)
-                image_paths.append(file_path)
-            else:
-                raise HTTPException(status_code=400, detail=f"Неподдерживаемый формат: {img.filename}")
+            # Проверка размера файла
+            content = await img.read()
+            if len(content) > MAX_FILE_SIZE_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Файл '{img.filename}' слишком большой. Максимальный размер: {MAX_FILE_SIZE_MB} МБ."
+                )
 
-        if not image_paths:
-            raise HTTPException(status_code=400, detail="Не загружено ни одного изображения")
+            # Возвращаем указатель файла в начало, чтобы его можно было сохранить
+            img.file.seek(0)
 
-        # 2. Сохраняем аудио
-        if audio.filename.lower().endswith(('.mp3', '.wav')):
-            safe_audio_name = "".join(c for c in audio.filename if c.isalnum() or c in "._- ")
-            audio_path = os.path.join(session_dir, safe_audio_name)
-            with open(audio_path, "wb") as f:
-                shutil.copyfileobj(audio.file, f)
-        else:
-            raise HTTPException(status_code=400, detail="Неподдерживаемый формат аудио")
+            # Очистка имени файла от опасных символов
+            safe_filename = "".join(c for c in (img.filename or "image") if c.isalnum() or c in "._- ")
+            file_path = os.path.join(session_dir, safe_filename)
 
-        # 3. Путь для готового видео
+            with open(file_path, "wb") as f:
+                f.write(content)
+
+            image_paths.append(file_path)
+
+        # 3. Обработка и проверка аудио
+        if audio.content_type not in ALLOWED_AUDIO_MIMES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Недопустимый формат аудио '{audio.filename}'. Разрешены только MP3 или WAV."
+            )
+
+        audio_content = await audio.read()
+        if len(audio_content) > MAX_FILE_SIZE_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Аудиофайл слишком большой. Максимальный размер: {MAX_FILE_SIZE_MB} МБ."
+            )
+
+        audio.file.seek(0)
+        safe_audio_name = "".join(c for c in (audio.filename or "audio") if c.isalnum() or c in "._- ")
+        audio_path = os.path.join(session_dir, safe_audio_name)
+
+        with open(audio_path, "wb") as f:
+            f.write(audio_content)
+
+        # 4. Формирование пути для готового видео
         output_filename = f"video_{session_id}.mp4"
         output_path = os.path.join(OUTPUT_DIR, output_filename)
 
-        # 4. Запуск генерации в отдельном потоке
+        # 5. Запуск генерации в отдельном потоке
         try:
-            # ИСПРАВЛЕНИЕ: используем get_running_loop() для стабильности
             loop = asyncio.get_running_loop()
             success = await loop.run_in_executor(
                 None,
@@ -87,9 +128,9 @@ async def generate_video(
             raise HTTPException(status_code=500, detail=f"Ошибка движка MoviePy: {str(e)}")
 
         if not success:
-            raise HTTPException(status_code=500, detail="Ошибка при создании видео.")
+            raise HTTPException(status_code=500, detail="Ошибка при создании видео. Проверьте логи.")
 
-        # 5. Возвращаем файл пользователю
+        # 6. Возврат готового файла пользователю
         return FileResponse(
             path=output_path,
             media_type="video/mp4",
@@ -100,8 +141,8 @@ async def generate_video(
         raise
     except Exception as e:
         print(f"ОБЩАЯ ОШИБКА СЕРВЕРА: {e}")
-        raise HTTPException(status_code=500, detail=f"Внутренняя ошибка: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Внутренняя ошибка сервера: {str(e)}")
 
     finally:
-        # Очистка временных файлов (безопасность)
+        # 7. Очистка временных файлов (безопасность и экономия места)
         shutil.rmtree(session_dir, ignore_errors=True)
