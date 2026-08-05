@@ -52,155 +52,83 @@
         }
 
         .card-audio { border-color: var(--neon-purple); box-shadow: 0 0 15px rgba(176, 0, 255, 0.2); }
-
         h2 { margin-top: 0; font-size: 18px; color: var(--neon-cyan); }
-
         input[type="file"] { display: none; }
 
         .upload-btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            text-align: center;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-            border: 2px solid transparent;
+            display: block; width: 100%; padding: 15px; text-align: center;
+            border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer;
+            transition: all 0.3s ease; box-sizing: border-box; border: 2px solid transparent;
         }
-
         .btn-images { background-color: var(--neon-blue); color: white; border-color: var(--neon-cyan); }
         .btn-images:hover { background-color: #0088ff; }
         .btn-audio { background-color: var(--neon-purple); color: white; border-color: var(--neon-cyan); }
         .btn-audio:hover { background-color: #cc33ff; }
 
         .file-list-container {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 200px;
-            overflow-y: auto;
+            margin-top: 15px; display: flex; flex-direction: column;
+            gap: 8px; max-height: 200px; overflow-y: auto;
         }
 
         .file-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: rgba(0, 0, 0, 0.3); padding: 8px 12px;
+            border-radius: 8px; font-size: 14px; border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .file-name {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-right: 10px;
-            flex-grow: 1;
-        }
-
+        .file-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; flex-grow: 1; }
         .remove-btn {
-            background: none;
-            border: none;
-            color: var(--neon-pink);
-            font-size: 18px;
-            cursor: pointer;
-            padding: 0 5px;
-            font-weight: bold;
+            background: none; border: none; color: var(--neon-pink); font-size: 18px;
+            cursor: pointer; padding: 0 5px; font-weight: bold;
         }
         .remove-btn:hover { color: #ff3388; text-shadow: 0 0 5px var(--neon-pink); }
 
-        /* Инфо-панель с временем */
         .info-panel {
-            margin-top: 15px;
-            padding: 12px;
+            margin-top: 15px; padding: 12px;
             background: linear-gradient(135deg, rgba(0, 102, 255, 0.2), rgba(0, 245, 255, 0.2));
-            border-radius: 12px;
-            border: 1px solid var(--neon-cyan);
-            text-align: center;
-            font-size: 16px;
+            border-radius: 12px; border: 1px solid var(--neon-cyan);
+            text-align: center; font-size: 16px;
         }
-
-        .info-panel strong {
-            color: var(--neon-cyan);
-            font-size: 18px;
-        }
+        .info-panel strong { color: var(--neon-cyan); font-size: 18px; }
 
         .progress-container {
-            display: none;
-            margin-top: 20px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            height: 24px;
-            overflow: hidden;
-            border: 1px solid var(--neon-cyan);
-            position: relative;
+            display: none; margin-top: 20px; background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px; height: 28px; overflow: hidden;
+            border: 1px solid var(--neon-cyan); position: relative;
         }
 
         .progress-bar {
-            height: 100%;
-            width: 0%;
+            height: 100%; width: 0%;
             background: linear-gradient(90deg, var(--neon-blue), var(--neon-cyan));
-            transition: width 0.3s ease;
+            transition: width 0.5s ease;
             box-shadow: 0 0 10px var(--neon-cyan);
         }
 
         .progress-text {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 2px black;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: bold; color: white;
+            text-shadow: 1px 1px 3px black; letter-spacing: 0.5px;
         }
 
         .generate-btn {
-            background-color: var(--neon-green);
-            color: #000;
-            border: 3px solid var(--neon-cyan);
-            border-radius: 18px;
-            padding: 20px;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background-color: var(--neon-green); color: #000;
+            border: 3px solid var(--neon-cyan); border-radius: 18px;
+            padding: 20px; font-size: 22px; font-weight: bold; cursor: pointer;
+            width: 100%; transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
         }
         .generate-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
         .generate-btn:disabled { background-color: #333; color: #777; border-color: #555; cursor: not-allowed; box-shadow: none; }
 
         .download-area {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            padding: 20px;
-            background-color: rgba(0, 255, 136, 0.1);
-            border-radius: 15px;
-            border: 1px solid var(--neon-green);
+            display: none; text-align: center; margin-top: 20px; padding: 20px;
+            background-color: rgba(0, 255, 136, 0.1); border-radius: 15px; border: 1px solid var(--neon-green);
         }
         .download-link {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 12px 24px;
-            background-color: var(--neon-green);
-            color: #000;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 12px;
-            border: 2px solid var(--neon-cyan);
+            display: inline-block; margin-top: 10px; padding: 12px 24px;
+            background-color: var(--neon-green); color: #000; text-decoration: none;
+            font-size: 18px; font-weight: bold; border-radius: 12px; border: 2px solid var(--neon-cyan);
         }
         .download-link:hover { background-color: #33ffaa; }
 
@@ -213,9 +141,8 @@
 <body>
 
 <div class="container">
-    <h1>⚡ Vertical Video Maker </h1>
+    <h1>⚡ Vertical Video Maker ⚡</h1>
 
-    <!-- Блок изображений -->
     <div class="card">
         <h2>📁 Изображения</h2>
         <label for="images" class="upload-btn btn-images">➕ Выбрать изображения</label>
@@ -223,14 +150,12 @@
         <div class="file-list-container" id="image-list">
             <div style="color: #666; text-align: center; padding: 10px;">Файлы не выбраны</div>
         </div>
-        <!-- 🔥 ИНФО-ПАНЕЛЬ С ВРЕМЕНЕМ -->
         <div class="info-panel" id="time-panel" style="display: none;">
             ⏱️ Общее время видео: <strong id="total-time">0 сек.</strong>
             (<span id="total-images">0</span> изобр. × 4 сек.)
         </div>
     </div>
 
-    <!-- Блок аудио -->
     <div class="card card-audio">
         <h2>🎵 Аудиофайл</h2>
         <label for="audio" class="upload-btn btn-audio">🎧 Выбрать музыку</label>
@@ -240,16 +165,13 @@
         </div>
     </div>
 
-    <!-- Кнопка генерации -->
     <button id="generate-btn" class="generate-btn">🎬 СОЗДАТЬ ВИДЕО</button>
 
-    <!-- Шкала прогресса -->
     <div class="progress-container" id="progress-container">
         <div class="progress-bar" id="progress-bar"></div>
         <div class="progress-text" id="progress-text">0%</div>
     </div>
 
-    <!-- Ссылка на скачивание -->
     <div class="download-area" id="download-area">
         <p style="margin-top:0; color: var(--neon-green); font-size: 18px;">✅ Видео готово!</p>
         <a href="#" id="download-link" class="download-link" download="vertical_video.mp4">⬇️ СКАЧАТЬ ВИДЕО</a>
@@ -273,7 +195,7 @@
 
     let selectedImages = [];
     let selectedAudio = null;
-    const FRAME_DURATION = 4; // секунд на кадр
+    const FRAME_DURATION = 4;
 
     // --- Управление изображениями ---
     imagesInput.addEventListener('change', function() {
@@ -283,7 +205,7 @@
             }
         }
         renderImageList();
-        updateTimeInfo(); // 🔥 Обновляем время
+        updateTimeInfo();
         this.value = '';
     });
 
@@ -305,7 +227,6 @@
         });
     }
 
-    // 🔥 Обновление информации о времени
     function updateTimeInfo() {
         const count = selectedImages.length;
         const totalSeconds = count * FRAME_DURATION;
@@ -324,7 +245,7 @@
     window.removeImage = function(index) {
         selectedImages.splice(index, 1);
         renderImageList();
-        updateTimeInfo(); // 🔥 Обновляем время при удалении
+        updateTimeInfo();
     }
 
     // --- Управление аудио ---
@@ -344,10 +265,7 @@
         }
         const item = document.createElement('div');
         item.className = 'file-item';
-        item.innerHTML = `
-            <span class="file-name">🎵 ${selectedAudio.name}</span>
-            <button class="remove-btn" onclick="removeAudio()">✕</button>
-        `;
+        item.innerHTML = `<span class="file-name">🎵 ${selectedAudio.name}</span><button class="remove-btn" onclick="removeAudio()">✕</button>`;
         audioListContainer.appendChild(item);
     }
 
@@ -356,7 +274,7 @@
         renderAudioList();
     }
 
-    // --- Генерация ---
+    // --- Генерация и УМНЫЙ ПРОГРЕСС-БАР С ТАЙМЕРОМ ---
     generateBtn.addEventListener('click', async function() {
         if (selectedImages.length === 0 || !selectedAudio) {
             alert('Пожалуйста, выберите изображения и аудиофайл!');
@@ -366,6 +284,13 @@
         generateBtn.disabled = true;
         downloadArea.style.display = 'none';
         progressContainer.style.display = 'block';
+
+        // 🔥 РАСЧЁТ ОЖИДАЕМОГО ВРЕМЕНИ
+        const totalImages = selectedImages.length;
+        const estimatedSecondsPerImage = 2.5; // ~2.5 сек на картинку (ultrafast preset)
+        const totalEstimatedSeconds = Math.ceil(totalImages * estimatedSecondsPerImage);
+        let startTime = Date.now();
+
         updateProgress(0, 'Подготовка файлов...');
 
         const formData = new FormData();
@@ -378,12 +303,15 @@
 
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
-                    const percent = Math.round((e.loaded / e.total) * 50);
-                    updateProgress(percent, `Загрузка: ${percent}%`);
+                    const percent = Math.round((e.loaded / e.total) * 40); // Загрузка занимает до 40%
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    const remaining = Math.max(0, Math.ceil(totalEstimatedSeconds - elapsed));
+                    updateProgress(percent, `Загрузка: ${percent}% (осталось ~${remaining} сек.)`);
                 }
             };
 
             xhr.onload = function() {
+                clearInterval(progressInterval);
                 if (xhr.status === 200) {
                     updateProgress(100, 'Готово!');
                     const blob = new Blob([xhr.response], { type: 'video/mp4' });
@@ -397,6 +325,7 @@
             };
 
             xhr.onerror = function() {
+                clearInterval(progressInterval);
                 alert('Ошибка сети. Проверьте, запущен ли сервер.');
                 resetUI();
             };
@@ -404,16 +333,22 @@
             xhr.responseType = 'blob';
             xhr.send(formData);
 
-            // Имитация прогресса обработки
-            let fakeProgress = 50;
-            const interval = setInterval(() => {
-                if (fakeProgress < 95 && xhr.readyState !== 4) {
-                    fakeProgress += Math.random() * 5;
-                    updateProgress(Math.round(fakeProgress), '🎬 Генерация видео...');
+            // 🔥 УМНАЯ ИМИТАЦИЯ ПРОГРЕССА ОБРАБОТКИ
+            let progressInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                const remaining = Math.max(0, Math.ceil(totalEstimatedSeconds - elapsed));
+
+                if (xhr.readyState !== 4) {
+                    // Плавное движение от 40% до 95% на основе прошедшего времени
+                    const timeProgress = Math.min(95, 40 + (elapsed / totalEstimatedSeconds) * 55);
+                    const currentPercent = Math.round(timeProgress);
+
+                    let timeText = remaining > 0 ? ` (осталось ~${remaining} сек.)` : ' (завершение...)';
+                    updateProgress(currentPercent, `🎬 Генерация видео...${timeText}`);
                 } else {
-                    clearInterval(interval);
+                    clearInterval(progressInterval);
                 }
-            }, 1000);
+            }, 500); // Обновление каждые полсекунды для плавности
 
         } catch (error) {
             alert('Ошибка: ' + error.message);
