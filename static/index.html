@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vertical Video Maker | SocialLift</title>
     <style>
-        /* ================= НЕОНОВЫЕ СТИЛИ ================= */
         :root {
             --bg-color: #0a0e1a;
             --frame-color: #151a2e;
@@ -77,7 +76,6 @@
         .btn-audio { background-color: var(--neon-purple); color: white; border-color: var(--neon-cyan); }
         .btn-audio:hover { background-color: #cc33ff; }
 
-        /* Список файлов с кнопками удаления */
         .file-list-container {
             margin-top: 15px;
             display: flex;
@@ -117,7 +115,22 @@
         }
         .remove-btn:hover { color: #ff3388; text-shadow: 0 0 5px var(--neon-pink); }
 
-        /* Прогресс-бар */
+        /* Инфо-панель с временем */
+        .info-panel {
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.2), rgba(0, 245, 255, 0.2));
+            border-radius: 12px;
+            border: 1px solid var(--neon-cyan);
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .info-panel strong {
+            color: var(--neon-cyan);
+            font-size: 18px;
+        }
+
         .progress-container {
             display: none;
             margin-top: 20px;
@@ -152,7 +165,6 @@
             text-shadow: 1px 1px 2px black;
         }
 
-        /* Главная кнопка */
         .generate-btn {
             background-color: var(--neon-green);
             color: #000;
@@ -169,7 +181,6 @@
         .generate-btn:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
         .generate-btn:disabled { background-color: #333; color: #777; border-color: #555; cursor: not-allowed; box-shadow: none; }
 
-        /* Блок скачивания */
         .download-area {
             display: none;
             text-align: center;
@@ -212,6 +223,11 @@
         <div class="file-list-container" id="image-list">
             <div style="color: #666; text-align: center; padding: 10px;">Файлы не выбраны</div>
         </div>
+        <!-- 🔥 ИНФО-ПАНЕЛЬ С ВРЕМЕНЕМ -->
+        <div class="info-panel" id="time-panel" style="display: none;">
+            ⏱️ Общее время видео: <strong id="total-time">0 сек.</strong>
+            (<span id="total-images">0</span> изобр. × 4 сек.)
+        </div>
     </div>
 
     <!-- Блок аудио -->
@@ -241,11 +257,13 @@
 </div>
 
 <script>
-    // ================= ЛОГИКА ИНТЕРФЕЙСА =================
     const imagesInput = document.getElementById('images');
     const audioInput = document.getElementById('audio');
     const imageListContainer = document.getElementById('image-list');
     const audioListContainer = document.getElementById('audio-list');
+    const timePanel = document.getElementById('time-panel');
+    const totalTimeSpan = document.getElementById('total-time');
+    const totalImagesSpan = document.getElementById('total-images');
     const generateBtn = document.getElementById('generate-btn');
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
@@ -253,26 +271,27 @@
     const downloadArea = document.getElementById('download-area');
     const downloadLink = document.getElementById('download-link');
 
-    // Хранилище выбранных файлов
     let selectedImages = [];
     let selectedAudio = null;
+    const FRAME_DURATION = 4; // секунд на кадр
 
     // --- Управление изображениями ---
     imagesInput.addEventListener('change', function() {
         for (let file of this.files) {
-            // Проверка на дубликаты
             if (!selectedImages.some(f => f.name === file.name && f.size === file.size)) {
                 selectedImages.push(file);
             }
         }
         renderImageList();
-        this.value = ''; // Сброс инпута, чтобы можно было выбрать те же файлы снова
+        updateTimeInfo(); // 🔥 Обновляем время
+        this.value = '';
     });
 
     function renderImageList() {
         imageListContainer.innerHTML = '';
         if (selectedImages.length === 0) {
             imageListContainer.innerHTML = '<div style="color: #666; text-align: center; padding: 10px;">Файлы не выбраны</div>';
+            timePanel.style.display = 'none';
             return;
         }
         selectedImages.forEach((file, index) => {
@@ -286,9 +305,26 @@
         });
     }
 
+    // 🔥 Обновление информации о времени
+    function updateTimeInfo() {
+        const count = selectedImages.length;
+        const totalSeconds = count * FRAME_DURATION;
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        if (count > 0) {
+            timePanel.style.display = 'block';
+            totalTimeSpan.textContent = minutes > 0 ? `${minutes} мин. ${seconds} сек.` : `${seconds} сек.`;
+            totalImagesSpan.textContent = count;
+        } else {
+            timePanel.style.display = 'none';
+        }
+    }
+
     window.removeImage = function(index) {
         selectedImages.splice(index, 1);
         renderImageList();
+        updateTimeInfo(); // 🔥 Обновляем время при удалении
     }
 
     // --- Управление аудио ---
@@ -320,14 +356,13 @@
         renderAudioList();
     }
 
-    // --- Генерация и прогресс-бар ---
+    // --- Генерация ---
     generateBtn.addEventListener('click', async function() {
         if (selectedImages.length === 0 || !selectedAudio) {
             alert('Пожалуйста, выберите изображения и аудиофайл!');
             return;
         }
 
-        // Блокируем интерфейс
         generateBtn.disabled = true;
         downloadArea.style.display = 'none';
         progressContainer.style.display = 'block';
@@ -338,14 +373,13 @@
         formData.append('audio', selectedAudio);
 
         try {
-            // Используем XMLHttpRequest для отслеживания реального прогресса ЗАГРУЗКИ
             const xhr = new XMLHttpRequest();
             xhr.open('POST', '/generate');
 
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
-                    const percent = Math.round((e.loaded / e.total) * 50); // Загрузка занимает первые 50%
-                    updateProgress(percent, `Загрузка файлов: ${percent}%`);
+                    const percent = Math.round((e.loaded / e.total) * 50);
+                    updateProgress(percent, `Загрузка: ${percent}%`);
                 }
             };
 
@@ -363,14 +397,14 @@
             };
 
             xhr.onerror = function() {
-                alert('Ошибка сети');
+                alert('Ошибка сети. Проверьте, запущен ли сервер.');
                 resetUI();
             };
 
             xhr.responseType = 'blob';
             xhr.send(formData);
 
-            // Имитация прогресса ОБРАБОТКИ после загрузки (так как сервер не шлёт проценты рендера)
+            // Имитация прогресса обработки
             let fakeProgress = 50;
             const interval = setInterval(() => {
                 if (fakeProgress < 95 && xhr.readyState !== 4) {
